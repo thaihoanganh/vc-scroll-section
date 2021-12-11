@@ -1,8 +1,29 @@
 import React, { Children, FC, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 export interface VcScrollSectionProps {
+  /**
+   * Animation duration in milliseconds
+   */
+  animationTimer?: number;
+
+  /**
+   * Disabled scroll section
+   */
   disabled?: boolean;
+
+  /**
+   * Multi scroll section
+   */
+  isMulti?: boolean;
+
+  /**
+   * External selected section
+   */
   sectionSelect?: number;
+
+  /**
+   * Callback before scroll occured
+   */
   sectionOnchange?: (key: number) => void;
 }
 
@@ -11,13 +32,18 @@ interface IVcScrollSectionState {
   sectionHeight: number[];
 }
 
+const DEFAULT_ANIMATION_TIMER = 1000;
+const DEFAULT_SECTION_SELECT = 0;
+
 let previousTouchMove: any = null;
 let isScrolling: boolean = false;
 
 export const VcScrollSection: FC<VcScrollSectionProps> = ({
+  animationTimer = DEFAULT_ANIMATION_TIMER,
   children,
   disabled,
-  sectionSelect = 0,
+  isMulti,
+  sectionSelect = DEFAULT_SECTION_SELECT,
   sectionOnchange,
 }) => {
   const [state, setState] = useState<IVcScrollSectionState>({
@@ -30,7 +56,7 @@ export const VcScrollSection: FC<VcScrollSectionProps> = ({
 
   useLayoutEffect(() => {
     setSectionHeight();
-  }, []);
+  }, [children]);
 
   useEffect(() => {
     setState((prevState) => ({ ...prevState, sectionIndex: sectionSelect }));
@@ -46,10 +72,6 @@ export const VcScrollSection: FC<VcScrollSectionProps> = ({
   }, [disabled]);
 
   useEffect(() => {
-    if (sectionOnchange) {
-      sectionOnchange(state.sectionIndex);
-    }
-
     if (!disabled) {
       let positionScroll: number = 1;
       for (let i = 0; i < state.sectionIndex; i++) {
@@ -69,32 +91,52 @@ export const VcScrollSection: FC<VcScrollSectionProps> = ({
   const setSectionHeight = () => {
     const sectionList = containerRef.current!.childNodes;
     const sectionHeight: number[] = [];
+    let { sectionIndex } = state;
 
     for (let i = 0; i < sectionList.length; i++) {
       const sectionRef = sectionList.item(i) as HTMLDivElement;
       sectionHeight.push(sectionRef.scrollHeight);
     }
 
+    if (sectionIndex > sectionList.length) {
+      sectionIndex = sectionList.length - 1;
+    }
+
     setState((prevState) => ({
       ...prevState,
+      sectionIndex,
       sectionHeight,
     }));
   };
 
   const handleScrollUp = () => {
     if (state.sectionIndex > 0) {
+      let { sectionIndex } = state;
+      sectionIndex -= 1;
+
+      if (sectionOnchange) {
+        sectionOnchange(sectionIndex);
+      }
+
       setState((prevState) => ({
         ...prevState,
-        sectionIndex: prevState.sectionIndex - 1,
+        sectionIndex,
       }));
     }
   };
 
   const handleScrollDown = () => {
     if (state.sectionIndex < state.sectionHeight.length - 1) {
+      let { sectionIndex } = state;
+      sectionIndex += 1;
+
+      if (sectionOnchange) {
+        sectionOnchange(sectionIndex);
+      }
+
       setState((prevState) => ({
         ...prevState,
-        sectionIndex: prevState.sectionIndex + 1,
+        sectionIndex,
       }));
     }
   };
@@ -109,9 +151,12 @@ export const VcScrollSection: FC<VcScrollSectionProps> = ({
 
       isScrolling = true;
 
-      setTimeout(() => {
-        isScrolling = false;
-      }, 1000);
+      setTimeout(
+        () => {
+          isScrolling = false;
+        },
+        isMulti ? 50 : animationTimer
+      );
     }
   };
 
@@ -127,9 +172,12 @@ export const VcScrollSection: FC<VcScrollSectionProps> = ({
         isScrolling = true;
         previousTouchMove = null;
 
-        setTimeout(() => {
-          isScrolling = false;
-        }, 1000);
+        setTimeout(
+          () => {
+            isScrolling = false;
+          },
+          isMulti ? 50 : animationTimer
+        );
       } else {
         previousTouchMove = e.touches[0].clientY;
       }
@@ -149,7 +197,7 @@ export const VcScrollSection: FC<VcScrollSectionProps> = ({
     >
       <div
         style={{
-          transition: "1000ms",
+          transition: `${animationTimer}ms`,
         }}
         ref={containerRef}
       >

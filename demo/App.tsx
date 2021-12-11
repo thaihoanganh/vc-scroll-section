@@ -7,22 +7,31 @@ import Switch from "./components/Switch";
 
 const App: FC = () => {
   const [state, setState] = useState({
-    sectionIndex: 0,
     disabled: false,
+    isMulti: false,
+    sectionIndex: 0,
   });
 
-  const handleDisabledScrollSection = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const toggleDisabledScrollSection = (e: React.ChangeEvent<HTMLInputElement>) => {
     setState((prevState) => ({
       ...prevState,
       disabled: e.target.checked,
     }));
   };
-
-  const handleScrollSection = (index: number) => {
+  const toggleMultiScrollSection = (e: React.ChangeEvent<HTMLInputElement>) => {
     setState((prevState) => ({
       ...prevState,
-      sectionIndex: index,
+      isMulti: e.target.checked,
     }));
+  };
+
+  const handleScrollSection = (index: number) => {
+    if (!state.disabled) {
+      setState((prevState) => ({
+        ...prevState,
+        sectionIndex: index,
+      }));
+    }
   };
 
   const Sidebar = (
@@ -47,19 +56,26 @@ const App: FC = () => {
 
       <div className="sidebar__control">
         <div className="control">
+          <div className="control__label">Multil scroll section</div>
+          <div className="control__action">
+            <Switch defaultChecked={state.isMulti} onChange={toggleMultiScrollSection} />
+          </div>
+        </div>
+        <div className="control">
           <div className="control__label">Disabled scroll section</div>
           <div className="control__action">
-            <Switch onChange={handleDisabledScrollSection} />
+            <Switch defaultChecked={state.disabled} onChange={toggleDisabledScrollSection} />
           </div>
         </div>
       </div>
     </div>
-  );2
+  );
 
   return (
     <MainLayout sidebar={Sidebar}>
       <VcScrollSection
         disabled={state.disabled}
+        isMulti={state.isMulti}
         sectionSelect={state.sectionIndex}
         sectionOnchange={handleScrollSection}
       >

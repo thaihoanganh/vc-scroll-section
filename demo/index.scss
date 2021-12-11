@@ -40,10 +40,12 @@ section {
   &__control {
     margin-top: auto;
     padding: 12px 24px;
+    border-top: 1px solid rgba(0, 0, 0, 0.16);
 
     .control {
       display: flex;
       height: 36px;
+      margin-top: 8px;
 
       &__label {
         font-weight: 500;
