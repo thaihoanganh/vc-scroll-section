@@ -1,0 +1,36 @@
+.switch {
+  &__input {
+    display: none;
+
+    &:checked ~ .switch__slider {
+      background-color: #000;
+
+      &::before {
+        transform: translateX(20px);
+        background-color: #fff;
+      }
+    }
+  }
+
+  &__slider {
+    display: flex;
+    align-items: center;
+    width: 40px;
+    height: 24px;
+    border-radius: 999px;
+    background-color: rgba(0, 0, 0, 0.24);
+    cursor: pointer;
+    transition: 300ms;
+
+    &::before {
+      content: "";
+      display: block;
+      width: 16px;
+      height: 16px;
+      background-color: #000;
+      border-radius: 999px;
+      transform: translateX(4px);
+      transition: 300ms;
+    }
+  }
+}
