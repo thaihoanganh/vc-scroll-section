@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC, useRef, useState } from "react";
 import VcScrollSection from "../package/index";
 
 import MainLayout from "./components/MainLayout";
@@ -6,10 +6,12 @@ import Menu, { MenuItem } from "./components/Menu";
 import Switch from "./components/Switch";
 
 const App: FC = () => {
+  const refFunOnChangeSession: any = useRef(null);
   const [state, setState] = useState({
     disabled: false,
     isMulti: false,
     sectionIndex: 0,
+    isNormal: false,
   });
 
   const toggleDisabledScrollSection = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -31,26 +33,28 @@ const App: FC = () => {
         ...prevState,
         sectionIndex: index,
       }));
+      if (state?.isNormal) {
+        refFunOnChangeSession.current?.onScrollToSession(index);
+      }
     }
   };
 
+  const renderMenuList = () => {
+    const html = [];
+    
+    for (let i = 0; i < 10; i++) {
+      html.push(<MenuItem key={i} onClick={() => handleScrollSection(i)}>{`Section ${i + 1}`}</MenuItem>)
+    };
+    return html;
+  }
   const Sidebar = (
     <div className="sidebar">
       <div className="sidebar__header">
         <h1>Vc-scroll-section</h1>
       </div>
       <div className="sidebar__menu">
-        <Menu menuSelected={state.sectionIndex}>
-          <MenuItem onClick={() => handleScrollSection(0)}>Section 1</MenuItem>
-          <MenuItem onClick={() => handleScrollSection(1)}>Section 2</MenuItem>
-          <MenuItem onClick={() => handleScrollSection(2)}>Section 3</MenuItem>
-          <MenuItem onClick={() => handleScrollSection(3)}>Section 4</MenuItem>
-          <MenuItem onClick={() => handleScrollSection(4)}>Section 5</MenuItem>
-          <MenuItem onClick={() => handleScrollSection(5)}>Section 6</MenuItem>
-          <MenuItem onClick={() => handleScrollSection(6)}>Section 7</MenuItem>
-          <MenuItem onClick={() => handleScrollSection(7)}>Section 8</MenuItem>
-          <MenuItem onClick={() => handleScrollSection(8)}>Section 9</MenuItem>
-          <MenuItem onClick={() => handleScrollSection(9)}>Section 10</MenuItem>
+        <Menu menuSelected={state.sectionIndex} isNormal={state?.isNormal}>
+          {renderMenuList()}
         </Menu>
       </div>
 
@@ -67,6 +71,12 @@ const App: FC = () => {
             <Switch defaultChecked={state.disabled} onChange={toggleDisabledScrollSection} />
           </div>
         </div>
+        <div className="control">
+          <div className="control__label">Normal scroll section</div>
+          <div className="control__action">
+            <Switch defaultChecked={state.isNormal} onChange={(e) => setState((prevState) => ({ ...prevState, isNormal: e.target.checked, sectionIndex: 0}))} />
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -76,8 +86,11 @@ const App: FC = () => {
       <VcScrollSection
         disabled={state.disabled}
         isMulti={state.isMulti}
+        isNormal={state?.isNormal}
         sectionSelect={state.sectionIndex}
+        classTabItem="vc-menu__item"
         sectionOnchange={handleScrollSection}
+        ref={refFunOnChangeSession}
       >
         <section>
           <h2>Section 1</h2>

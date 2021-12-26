@@ -11,7 +11,7 @@ export interface MenuItemProps
 export const MenuItem: FC<MenuItemProps> = ({ className, children, isActive, ...otherProps }) => {
   return (
     <li
-      className={classNames("menu__item", isActive && "menu__item--active", className)}
+      className={classNames("menu__item vc-menu__item", isActive && "menu__item--active", className)}
       {...otherProps}
     >
       {children}
